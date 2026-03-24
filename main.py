@@ -5,10 +5,15 @@ from db.pinecone_manager import pc
 from db.postegres_connection import postegre
 from fastapi.middleware.cors import CORSMiddleware
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    os.getenv('URL_CLIENT_DEPLOY')
 ]
 
 app.add_middleware(

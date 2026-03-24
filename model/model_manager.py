@@ -1,16 +1,19 @@
-from sentence_transformers import SentenceTransformer
+from openai import OpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 class ModelManager:
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    splitter = RecursiveCharacterTextSplitter(
+    def __init__(self):
+        self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+        self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=500,
             chunk_overlap=50,
             separators=["\n\n", "\n", ".", " ", ""]
         )
-    
-    def __init__(self):
-        pass
 
     def chunk_text(self, texts):
         if isinstance(texts, str):
@@ -23,9 +26,20 @@ class ModelManager:
         return chunks
 
     def generate_embeddings(self, chunks: list) -> list:
-        return self.model.encode(chunks).tolist()
+        response = self.client.embeddings.create(
+            input=chunks,
+            model="text-embedding-3-small"
+        )
+        
+        return [item.embedding for item in response.data]
 
     def embed_query(self, query):
-        return self.model.encode([query]).tolist()[0]
+        response = self.client.embeddings.create(
+            model="text-embedding-3-small",
+            input=[query]
+        )
+        
+        return response.data[0].embedding
+
 
 model_manager = ModelManager()

@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
-from pinecone import Pinecone
 load_dotenv()
+from pinecone import Pinecone, ServerlessSpec
 
 class PineconeManager:
     pc = Pinecone(
@@ -14,7 +14,11 @@ class PineconeManager:
         if self.INDEX_NAME not in self.pc.list_indexes().names():
             self.pc.create_index(
                 name=self.INDEX_NAME,
-                dimension=384
+                dimension=1536,
+                spec=ServerlessSpec(
+                    cloud="aws",
+                    region=os.getenv('PINECONE_ENV')
+                )
             )
         self.index = self.pc.Index(self.INDEX_NAME)
         pass
